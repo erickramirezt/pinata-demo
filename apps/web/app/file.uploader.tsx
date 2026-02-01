@@ -6,13 +6,8 @@ import { useState, useCallback } from 'react'
 import { Upload, X, File, ImageIcon, FileText } from 'lucide-react'
 import { Button } from '@workspace/ui/components/button'
 import { cn } from '@workspace/ui/lib/utils'
-
-interface UploadedFile {
-  id: string
-  name: string
-  size: number
-  type: string
-}
+import pinataClient from '@/clients/pinata.client'
+import { toast } from 'sonner'
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes'
@@ -29,24 +24,44 @@ function getFileIcon(type: string) {
 }
 
 export function FileUploader() {
-  const [files, setFiles] = useState<UploadedFile[]>([])
+  const [files, setFiles] = useState<File[]>([])
+
   const [isDragOver, setIsDragOver] = useState(false)
 
-  const uploadFiles = useCallback(() => {
+  const uploadFiles = useCallback(async () => {
     if (!files.length) return
 
-    console.log(files)
+    try {
+      // console.log(data)
+
+      files.forEach(async (file) => {
+        const urlResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/presigned_url?groupId=27cff6e5-bc9c-4e87-bd6f-a364dadca36e`,
+          {
+            method: 'GET',
+            headers: {
+              // Handle your own server authorization here
+            },
+          },
+        )
+        const data = await urlResponse.json()
+
+        await pinataClient.upload.public
+          .file(file)
+          .group('27cff6e5-bc9c-4e87-bd6f-a364dadca36e')
+          .url(data.url)
+      })
+
+      toast.success('File uploaded successfully!')
+    } catch (error) {
+      toast.error(
+        `Error: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
   }, [files])
 
   const preUpload = useCallback((file: File) => {
-    const newFile: UploadedFile = {
-      id: Math.random().toString(36).substring(7),
-      name: file.name,
-      size: file.size,
-      type: file.type,
-    }
-
-    setFiles((prev) => [...prev, newFile])
+    setFiles((prev) => [...prev, file])
   }, [])
 
   const handleDrop = useCallback(
@@ -78,8 +93,8 @@ export function FileUploader() {
     [preUpload],
   )
 
-  const removeFile = useCallback((id: string) => {
-    setFiles((prev) => prev.filter((f) => f.id !== id))
+  const removeFile = useCallback((name: string) => {
+    setFiles((prev) => prev.filter((f) => f.name !== name))
   }, [])
 
   return (
@@ -143,7 +158,7 @@ export function FileUploader() {
               const FileIcon = getFileIcon(file.type)
               return (
                 <div
-                  key={file.id}
+                  key={file.name}
                   className='flex items-center gap-3 p-3 bg-card border border-border rounded-lg'
                 >
                   <div className='p-2 bg-muted rounded-lg shrink-0'>
@@ -162,7 +177,7 @@ export function FileUploader() {
                       variant='ghost'
                       size='icon'
                       className='h-8 w-8'
-                      onClick={() => removeFile(file.id)}
+                      onClick={() => removeFile(file.name)}
                     >
                       <X className='w-4 h-4' />
                       <span className='sr-only'>Eliminar archivo</span>
