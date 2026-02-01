@@ -2,6 +2,7 @@
 
 import pinataClient from '@/clients/pinata.client'
 import { useState } from 'react'
+import { FileUploadDialog } from './file.upload.dialog'
 
 export default function HomePage() {
   const [file, setFile] = useState<File | null>(null)
@@ -53,27 +54,30 @@ export default function HomePage() {
   }
 
   return (
-    <>
-      <h1>Vite + React + Pinata</h1>
-      <div className='card'>
-        <input type='file' onChange={handleFileChange} />
-        <br />
-        <button onClick={handleUpload} disabled={!file}>
-          Upload to Pinata
-        </button>
-        <br />
-        {uploadStatus && <p>{uploadStatus}</p>}
-        <br />
-        {link && (
-          <a href={`${link}?filename=${file?.name}`} download={file?.name}>
-            Download File {file?.name}
-          </a>
-        )}
-      </div>
-      <br />
-      <p className='read-the-docs'>
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    // <>
+    //   <h1>Vite + React + Pinata</h1>
+    //   <div className='card'>
+    //     <input type='file' onChange={handleFileChange} />
+    //     <br />
+    //     <button onClick={handleUpload} disabled={!file}>
+    //       Upload to Pinata
+    //     </button>
+    //     <br />
+    //     {uploadStatus && <p>{uploadStatus}</p>}
+    //     <br />
+    //     {link && (
+    //       <a href={`${link}?filename=${file?.name}`} download={file?.name}>
+    //         Download File {file?.name}
+    //       </a>
+    //     )}
+    //   </div>
+    //   <br />
+    //   <p className='read-the-docs'>
+    //     Click on the Vite and React logos to learn more
+    //   </p>
+    // </>
+    <main className='min-h-screen bg-background flex items-center justify-center'>
+      <FileUploadDialog />
+    </main>
   )
 }
