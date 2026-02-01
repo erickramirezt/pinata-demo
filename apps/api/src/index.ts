@@ -18,19 +18,21 @@ app.get('/', (c) => {
 app.get('/presigned_url', async (c) => {
   // Handle Auth
 
-  const groupId = c.req.query('groupId')
-
   const pinata = new PinataSDK({
     pinataJwt: String(process.env.PINATA_JWT),
     pinataGateway: String(process.env.GATEWAY_URL),
   })
 
-  const url = await pinata.upload.public.createSignedURL({
-    expires: 60, // Last for 60 seconds
-    groupId,
+  const group = await pinata.groups.public.create({
+    name: crypto.randomUUID(),
   })
 
-  return c.json({ url }, { status: 200 })
+  const url = await pinata.upload.public.createSignedURL({
+    expires: 60, // Last for 60 seconds
+    groupId: group.id,
+  })
+
+  return c.json({ url, groupId: group.id }, { status: 200 })
 })
 
 serve(

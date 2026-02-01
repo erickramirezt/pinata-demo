@@ -36,7 +36,7 @@ export function FileUploader() {
 
       files.forEach(async (file) => {
         const urlResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_SERVER_URL}/presigned_url?groupId=27cff6e5-bc9c-4e87-bd6f-a364dadca36e`,
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/presigned_url`,
           {
             method: 'GET',
             headers: {
@@ -48,7 +48,7 @@ export function FileUploader() {
 
         await pinataClient.upload.public
           .file(file)
-          .group('27cff6e5-bc9c-4e87-bd6f-a364dadca36e')
+          .group(data.groupId)
           .url(data.url)
       })
 
